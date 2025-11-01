@@ -1,11 +1,13 @@
 package com.platzi.pizza.persistence.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -24,7 +26,7 @@ public class OrderEntity {
     private String idCustomer;
 
     @Column(nullable = false,columnDefinition = "DATETIME")
-    private LocalDate date;
+    private LocalDateTime date;
 
     @Column(nullable = false,columnDefinition = "DECIMAL(6,2)")
     private Double total;
@@ -35,10 +37,13 @@ public class OrderEntity {
     @Column(name = "additional_notes",length = 200)
     private String additionalNotes;
 
-    @OneToOne(cascade = CascadeType.ALL)
+//    con lazi le estamos diciendo que no cargue esta relacion si no hasta que se use
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_customer",referencedColumnName = "id_customer",insertable = false,updatable = false)
+    @JsonIgnore
     private CustomerEntity  customer;
 
-    @OneToMany(mappedBy = "order")
+//    cuando tratemos de recuperar un order entity tambien debe traer automaticamente esta relacion
+    @OneToMany(mappedBy = "order",fetch = FetchType.EAGER)
     private List<OrderItemEntity> items;
 }

@@ -1,15 +1,16 @@
 package com.platzi.pizza.service;
 
 import com.platzi.pizza.persistence.entity.PizzaEntity;
+import com.platzi.pizza.persistence.repository.PizzaPagSortRepository;
 import com.platzi.pizza.persistence.repository.PizzaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.ListCrudRepository;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class PizzaService {
@@ -20,19 +21,24 @@ public class PizzaService {
 */
 //    private final JdbcTemplate jdbcTemplate;
     private final PizzaRepository pizzaRepository;
+//    importamos el repositorio de PaginandSortingRepository
+    private final PizzaPagSortRepository pizzaPagSortRepository;
 
     @Autowired //se encarga de inyeccion de dependencias de todos los componentes
-    public PizzaService(PizzaRepository pizzaRepository) {
+    public PizzaService(PizzaRepository pizzaRepository, PizzaPagSortRepository pizzaPagSortRepository) {
         this.pizzaRepository = pizzaRepository;
+        this.pizzaPagSortRepository = pizzaPagSortRepository;
     }
  /*   public PizzaService(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }*/
 
 //    Nos permite retornar todas las entidades que se encuentran en la tabla Pizza
-    public List<PizzaEntity> getAll() {
+    public Page<PizzaEntity> getAll(int page, int size) {
 //        return this.jdbcTemplate.query("select * from pizza order by id_pizza DESC",new BeanPropertyRowMapper<>(PizzaEntity.class));
-        return pizzaRepository.findAll();
+        //return pizzaRepository.findAll(); vamos a modificar el retur para que sea paginada
+        Pageable pageRequest = PageRequest.of(page, size);
+        return this.pizzaPagSortRepository.findAll(pageRequest);
     }
 
     public PizzaEntity getById(int id) {
@@ -45,6 +51,32 @@ public class PizzaService {
     }
     public boolean exists(int idPizza) {
         return pizzaRepository.existsById(idPizza);
+    }
+
+    public void delete(int idPizza) {
+        this.pizzaRepository.deleteById(idPizza);
+    }
+
+    public List<PizzaEntity> findAllByavailable() {
+        System.out.println(this.pizzaRepository.countByVeganTrue());
+      return this.pizzaRepository.findAllByAvailableTrueOrderByPriceDesc();
+    }
+
+    public PizzaEntity findbyname(String name) {
+//        return this.pizzaRepository.findAllByAvailableTrueAndNameIgnoreCase(name);
+        return this.pizzaRepository.findFirstByAvailableTrueAndNameIgnoreCase(name).orElseThrow(()->new RuntimeException("La pizza no existe"));
+    }
+
+    public List<PizzaEntity> getWith(String ingredient) {
+        return this.pizzaRepository.findAllByAvailableTrueAndDescriptionContainingIgnoreCase(ingredient);
+    }
+
+    public List<PizzaEntity> getWithOut(String ingredient) {
+        return this.pizzaRepository.findAllByAvailableTrueAndDescriptionNotContainingIgnoreCase(ingredient);
+    }
+
+    public List<PizzaEntity> getCheapest(double price) {
+        return this.pizzaRepository.findTop3ByAvailableTrueAndPriceLessThanEqualOrderByPriceAsc(price);
     }
 }
 

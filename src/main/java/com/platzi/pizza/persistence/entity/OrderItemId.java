@@ -28,3 +28,6 @@ public class OrderItemId  implements Serializable {
         return Objects.hash(idOrder, idItem);
     }
 }
+
+
+//Esta clase contiene las llaves foraneas y la clase que lo implementa es OrderItemEntity
