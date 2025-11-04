@@ -45,5 +45,7 @@ public class OrderEntity {
 
 //    cuando tratemos de recuperar un order entity tambien debe traer automaticamente esta relacion
     @OneToMany(mappedBy = "order",fetch = FetchType.EAGER)
+    @OrderBy("price DESC")
+    @JsonIgnore
     private List<OrderItemEntity> items;
 }

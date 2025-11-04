@@ -2,6 +2,7 @@ package com.platzi.pizza.web.controller;
 
 import com.platzi.pizza.persistence.entity.PizzaEntity;
 import com.platzi.pizza.service.PizzaService;
+import com.platzi.pizza.service.dto.UpdatePizzaPriceDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -52,6 +53,16 @@ public class PizzaController {
         return ResponseEntity.badRequest().build();
     }
 
+    //    se va a actualizar el precio de una pizza con un DTO que guarda unicamente los dos campos solicitados
+    @PutMapping("/dto")
+    public ResponseEntity<Void> updatePricePizza(@RequestBody UpdatePizzaPriceDto dto) {
+        if (dto.getPizzaId() != null && this.pizzaService.exists(dto.getPizzaId())) {
+            this.pizzaService.updatePrice(dto);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.badRequest().build();
+    }
+
     @DeleteMapping("/delete/{idPizza}")
     public ResponseEntity<Void> deleteById(@PathVariable int idPizza) {
         if (this.pizzaService.exists(idPizza)) {
@@ -63,8 +74,11 @@ public class PizzaController {
     }
 
     @GetMapping("/available")
-    public ResponseEntity<List<PizzaEntity>> findAllByavailable() {
-        return ResponseEntity.ok(this.pizzaService.findAllByavailable());
+    public ResponseEntity<Page<PizzaEntity>> findAllByavailable(@RequestParam(defaultValue = "0") int page,
+                                                                @RequestParam(defaultValue = "4") int size,
+                                                                @RequestParam(defaultValue = "price") String sortBy,
+                                                                @RequestParam(defaultValue = "ASC")String sortDirection) {
+        return ResponseEntity.ok(this.pizzaService.findAllByavailable(page, size, sortBy,sortDirection));
     }
 
     @GetMapping("/pizzaname/{name}")

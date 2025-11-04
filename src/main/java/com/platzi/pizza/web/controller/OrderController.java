@@ -2,12 +2,12 @@ package com.platzi.pizza.web.controller;
 
 
 import com.platzi.pizza.persistence.entity.OrderEntity;
+import com.platzi.pizza.persistence.projection.OrderSUmmary;
 import com.platzi.pizza.service.OrderService;
+import com.platzi.pizza.service.dto.RandomOrderDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -39,5 +39,20 @@ public class OrderController {
     @GetMapping("/outside")
     public  ResponseEntity<List<OrderEntity>> getOutSideOrders(){
         return  ResponseEntity.ok(orderService.getOutsideOrders());
+    }
+
+    @GetMapping("/customer/{idCustomer}")
+    public ResponseEntity<List<OrderEntity>> getCustomerOrders(@PathVariable String idCustomer){
+        return ResponseEntity.ok(orderService.getCustomerOrders(idCustomer));
+    }
+
+    @GetMapping("/summary/{orderId}")
+    public ResponseEntity<OrderSUmmary> getSummary(@PathVariable int orderId){
+        return ResponseEntity.ok(orderService.getSummary(orderId));
+    }
+
+    @PostMapping("/random")
+    public ResponseEntity<Boolean> randomOrder(@RequestBody RandomOrderDto dto){
+        return ResponseEntity.ok(orderService.saveRandomOrder(dto));
     }
 }

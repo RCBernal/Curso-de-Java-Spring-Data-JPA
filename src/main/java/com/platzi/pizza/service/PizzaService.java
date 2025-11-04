@@ -3,11 +3,14 @@ package com.platzi.pizza.service;
 import com.platzi.pizza.persistence.entity.PizzaEntity;
 import com.platzi.pizza.persistence.repository.PizzaPagSortRepository;
 import com.platzi.pizza.persistence.repository.PizzaRepository;
+import com.platzi.pizza.service.dto.UpdatePizzaPriceDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 import java.util.List;
@@ -57,9 +60,13 @@ public class PizzaService {
         this.pizzaRepository.deleteById(idPizza);
     }
 
-    public List<PizzaEntity> findAllByavailable() {
+    public Page<PizzaEntity> findAllByavailable(int page, int size, String sortBy, String sortDirection) {
         System.out.println(this.pizzaRepository.countByVeganTrue());
-      return this.pizzaRepository.findAllByAvailableTrueOrderByPriceDesc();
+//      return this.pizzaRepository.findAllByAvailableTrueOrderByPriceDesc();
+
+        Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
+        Pageable pageRequest = PageRequest.of(page, size, sort);
+        return this.pizzaPagSortRepository.findByAvailableTrue(pageRequest);
     }
 
     public PizzaEntity findbyname(String name) {
@@ -77,6 +84,14 @@ public class PizzaService {
 
     public List<PizzaEntity> getCheapest(double price) {
         return this.pizzaRepository.findTop3ByAvailableTrueAndPriceLessThanEqualOrderByPriceAsc(price);
+    }
+
+  /*  La anotación @Transactional garantiza que las transacciones sean atómicas incluso con
+    una sola operación. No solo es para métodos con dos o más operaciones;
+    asegura integridad y rollback en errores*/
+    @Transactional
+    public void updatePrice(UpdatePizzaPriceDto dto){
+        this.pizzaRepository.updatePrice(dto);
     }
 }
 

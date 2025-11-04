@@ -1,10 +1,13 @@
 package com.platzi.pizza.service;
 
 import com.platzi.pizza.persistence.entity.OrderEntity;
+import com.platzi.pizza.persistence.projection.OrderSUmmary;
 import com.platzi.pizza.persistence.repository.OrderRepository;
+import com.platzi.pizza.service.dto.RandomOrderDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -38,6 +41,24 @@ public class OrderService {
     public List<OrderEntity>getOutsideOrders(){
         List<String> methods= Arrays.asList(DELIVERY,CARRYOUT);
         return this.orderRepository.findAllByMethodIn(methods);
+    }
+
+    public List<OrderEntity> getCustomerOrders(String idCustomer){
+        List<OrderEntity> order= this.orderRepository.findCustomerOrders(idCustomer);
+        if(order.isEmpty()){
+            throw new RuntimeException("El cliente no tiene pedidios");
+        }else {
+            return order;
+        }
+    }
+
+    public OrderSUmmary getSummary(int orderId){
+        return this.orderRepository.findSummary(orderId);
+    }
+
+    @Transactional
+    public boolean saveRandomOrder(RandomOrderDto  randomOrder){
+        return this.orderRepository.saveRandomOrder(randomOrder.getIdCustomer(),randomOrder.getMethod());
     }
 
 }
